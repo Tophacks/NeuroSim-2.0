@@ -29,3 +29,32 @@ This is an intentionally simplified 2D point-mass + pitch model. Approximate con
 
 ## Validation
 Evaluate on held-out random seeds. Compare landing rate, landing error, crash count, fuel usage, and average reward, not only training reward. Preserve frozen baseline results before retraining.
+
+
+## Interactive flight viewer and manual demonstrations
+
+Install the updated dependencies and run from the repository root:
+
+```powershell
+git pull
+.\.venv\Scripts\python.exe -m pip install -r requirements.txt
+.\.venv\Scripts\python.exe viewer.py --mode manual --vehicle falcon9_inspired --planet earth
+```
+
+Manual flight: Up/W increases throttle; Down/S decreases it; Left/A and Right/D gimbal the engine. Space pauses, R resets the flight, F5 saves the current recording, and Esc exits. Completed flights are automatically saved as JSON files in `demonstrations/` with state/action/reward/next-state records and the final outcome. Partial recordings can be saved with F5 or Esc, but are not marked successful.
+
+```powershell
+# Pretrain a PPO-compatible actor by imitating successful manual flights
+.\.venv\Scripts\python.exe imitation_train.py --epochs 30 --output models/rocket_imitation
+
+# Evaluate the imitation-only policy
+.\.venv\Scripts\python.exe evaluate.py --model models/rocket_imitation.zip --episodes 100
+
+# Continue improving via PPO (saves a NEW model; does not overwrite imitation model)
+.\.venv\Scripts\python.exe train.py --resume models/rocket_imitation.zip --steps 200000 --output models/rocket_finetuned
+
+# Watch the trained agent
+.\.venv\Scripts\python.exe viewer.py --mode ai --model models/rocket_finetuned.zip
+```
+
+Only successful flights matching the selected planet and vehicle are used for imitation by default. For exploratory training on all manual actions, pass `--include-failures` (this may teach bad actions). The viewer uses the simplified 2D physics environment, not a flight-qualified rocket model. Behavioural cloning provides an initialization, not a guarantee of landing. Compare performance with a fresh PPO baseline on the same held-out evaluation seeds. Manual control is intentionally challenging; a hover/landing controller or easier curriculum may be needed to collect successful demonstrations.
