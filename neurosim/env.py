@@ -1,7 +1,7 @@
 """A simplified continuous-control 2D landing environment.
 
 Coordinates: x horizontal, z upward; angle is clockwise-positive tilt from vertical.
-Actions: [throttle request 0..1, signed gimbal -1..1].
+Actions: [throttle 0..1, signed engine gimbal -1..1, signed RCS thruster -1..1].
 No claims of flight fidelity. Use only for software experimentation.
 """
 import math
@@ -25,8 +25,8 @@ class RocketLandingEnv(gym.Env):
         self.render_mode = render_mode
         self.dt = 0.1
         self.action_space = spaces.Box(
-            low=np.array([0, -1], dtype=np.float32),
-            high=np.array([1, 1], dtype=np.float32),
+            low=np.array([0, -1, -1], dtype=np.float32),
+            high=np.array([1, 1, 1], dtype=np.float32),
         )
         # [x/100, z/300, vx/50, vz/50, angle/pi, omega/2,
         #  fuel_fraction, target_offset/100] clipped for stable learning.
@@ -34,7 +34,7 @@ class RocketLandingEnv(gym.Env):
         self.state = None
         self.steps = 0
         self.prev_shaping = 0.0
-        self.last_action = np.zeros(2)
+        self.last_action = np.zeros(3)
 
     def _observation(self):
         x, z, vx, vz, theta, omega, fuel = self.state
@@ -65,7 +65,7 @@ class RocketLandingEnv(gym.Env):
     def step(self, action):
         action = np.clip(np.asarray(action, dtype=np.float64), self.action_space.low,
                          self.action_space.high)
-        throttle, gimbal = action
+        throttle, gimbal, rcs = action
         x, z, vx, vz, theta, omega, fuel = self.state
         v = self.vehicle
         p = self.planet
@@ -94,7 +94,7 @@ class RocketLandingEnv(gym.Env):
         self.steps += 1
 
         shaping = self._shaping()
-        reward = float((shaping - self.prev_shaping) * 0.8 - 0.008 * fuel_used)
+        reward = float((shaping - self.prev_shaping) * 0.8 - 0.008 * fuel_used\n                       - 0.015 * abs(float(rcs)))
         self.prev_shaping = shaping
         touchdown = z <= v.height / 2
         out_of_bounds = abs(x) > 300 or z > 450 or abs(theta) > 1.4
@@ -110,7 +110,7 @@ class RocketLandingEnv(gym.Env):
         info = {
             "outcome": outcome,
             "landing_error_m": float(abs(x)) if touchdown else None,
-            "fuel_used_kg": float(v.fuel_mass - fuel),
+            "fuel_used_kg": float(v.fuel_mass - fuel),\n            "rcs_command": float(rcs),
             "horizontal_speed_m_s": float(abs(vx)),
             "vertical_speed_m_s": float(abs(vz)),
         }
