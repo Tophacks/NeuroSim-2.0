@@ -87,7 +87,7 @@ def main():
                     restart()
                 elif event.key == pygame.K_SPACE:
                     paused = not paused
-                elif event.key == pygame.K_s and args.mode == "manual":
+                elif event.key == pygame.K_F5 and args.mode == "manual":
                     save_episode()
         keys = pygame.key.get_pressed()
         if not paused and outcome == "flying":
@@ -159,7 +159,7 @@ def main():
         ]
         for i, line in enumerate(lines):
             screen.blit(font.render(line, True, PAD if i in (0, 15) else WHITE), (panel_x, 26 + i*33))
-        instructions = "UP/DOWN: throttle | LEFT/RIGHT: gimbal | SPACE: pause | R: new flight | ESC: quit"
+        instructions = "UP/DOWN: throttle | LEFT/RIGHT: gimbal | F5: save | SPACE: pause | R: reset | ESC: quit"
         if args.mode == "ai":
             instructions = "AI flight | SPACE: pause | R: new flight | ESC: quit"
         screen.blit(small.render(instructions, True, WHITE), (18, HEIGHT - 35))
