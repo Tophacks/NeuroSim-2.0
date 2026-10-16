@@ -24,11 +24,17 @@ def main():
                     n_steps=2048, batch_size=64, tensorboard_log=None)
     Path("checkpoints").mkdir(exist_ok=True)
     cb = CheckpointCallback(save_freq=50_000, save_path="checkpoints", name_prefix="rocket")
-    model.learn(total_timesteps=args.steps, reset_num_timesteps=not bool(args.resume), callback=cb)
-    Path(args.output).parent.mkdir(parents=True, exist_ok=True)
-    model.save(args.output)
-    print(f"Saved policy to {args.output}.zip")
-    env.close()
+    try:
+        model.learn(total_timesteps=args.steps, reset_num_timesteps=not bool(args.resume), callback=cb)
+    except KeyboardInterrupt:
+        print("Training interrupted; saving current policy before exiting.")
+    finally:
+        output = Path(args.output)
+        output.parent.mkdir(parents=True, exist_ok=True)
+        model.save(str(output))
+        saved_path = output if output.suffix == ".zip" else output.with_suffix(".zip")
+        print(f"Saved policy to {saved_path}")
+        env.close()
 
 
 if __name__ == "__main__":
