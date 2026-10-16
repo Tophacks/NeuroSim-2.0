@@ -18,7 +18,7 @@ def load_samples(directory, planet, vehicle, include_failures=False):
     episodes = 0
     for path in sorted(Path(directory).glob("manual_*.json")):
         data = json.loads(path.read_text(encoding="utf-8"))
-        if data.get("schema_version") != 1 or data.get("source") != "human":
+        if data.get("schema_version") != 2 or data.get("source") != "human":
             continue
         if data.get("planet") != planet or data.get("vehicle") != vehicle:
             continue
