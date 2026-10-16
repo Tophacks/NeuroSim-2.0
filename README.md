@@ -58,3 +58,28 @@ Manual flight: Up/W increases throttle; Down/S decreases it; Left/A and Right/D 
 ```
 
 Only successful flights matching the selected planet and vehicle are used for imitation by default. For exploratory training on all manual actions, pass `--include-failures` (this may teach bad actions). The viewer uses the simplified 2D physics environment, not a flight-qualified rocket model. Behavioural cloning provides an initialization, not a guarantee of landing. Compare performance with a fresh PPO baseline on the same held-out evaluation seeds. Manual control is intentionally challenging; a hover/landing controller or easier curriculum may be needed to collect successful demonstrations.
+
+
+## Falcon 9-inspired Mission Control and side thrusters
+
+The upgraded viewer draws a stylized white/black booster with a nose profile, grid fins,
+landing legs, engine plume, and opposing reaction-control thruster jets. The right
+panel shows live telemetry. The model is a **2D educational approximation**, not an
+accurate SpaceX vehicle or a photorealistic 3D simulator.
+
+Controls: **W/S or Up/Down** throttle, **A/D or Left/Right** engine gimbal,
+**Q/E** side thrusters (opposite attitude torque), **Space** pause, **R** reset,
+**F5** save partial flight, **Esc** quit. Completed manual flights auto-save.
+
+The action vector is now `[throttle, gimbal, rcs]` (3 continuous controls).
+**Older 2-action NeuroSim 2.0 checkpoints cannot be loaded** into this version:
+retrain PPO and recollect manual demonstrations with the updated viewer.
+Imitation training uses schema-version-2 demonstration files. Earlier
+2-action recordings are ignored to avoid training with incompatible actions.
+
+```powershell
+git pull
+.\.venv\Scripts\python.exe -m pip install -r requirements.txt
+.\.venv\Scripts\python.exe -m unittest discover -s tests -v
+.\.venv\Scripts\python.exe viewer.py --mode manual
+```
