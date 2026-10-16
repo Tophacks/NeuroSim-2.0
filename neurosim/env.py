@@ -94,7 +94,8 @@ class RocketLandingEnv(gym.Env):
         self.steps += 1
 
         shaping = self._shaping()
-        reward = float((shaping - self.prev_shaping) * 0.8 - 0.008 * fuel_used\n                       - 0.015 * abs(float(rcs)))
+        reward = float((shaping - self.prev_shaping) * 0.8 - 0.008 * fuel_used
+                       - 0.015 * abs(float(rcs)))
         self.prev_shaping = shaping
         touchdown = z <= v.height / 2
         out_of_bounds = abs(x) > 300 or z > 450 or abs(theta) > 1.4
