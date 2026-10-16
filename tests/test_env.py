@@ -13,11 +13,23 @@ class RocketEnvironmentTests(unittest.TestCase):
                 obs, _ = env.reset(seed=42)
                 self.assertEqual(obs.shape, (8,))
                 self.assertTrue(env.observation_space.contains(obs))
-                obs, reward, terminated, truncated, info = env.step(np.array([0.5, 0.0]))
+                obs, reward, terminated, truncated, info = env.step(np.array([0.5, 0.0, 0.0]))
                 self.assertTrue(np.isfinite(reward))
                 self.assertTrue(env.observation_space.contains(obs))
                 self.assertIn("outcome", info)
                 env.close()
+
+    def test_rcs_changes_rotation(self):
+        a = RocketLandingEnv()
+        b = RocketLandingEnv()
+        a.reset(seed=99)
+        b.reset(seed=99)
+        a.step(np.array([0.0, 0.0, 1.0]))
+        b.step(np.array([0.0, 0.0, -1.0]))
+        self.assertGreater(a.state[5], b.state[5])
+        self.assertEqual(a.action_space.shape, (3,))
+        a.close()
+        b.close()
 
     def test_seed_reproducibility(self):
         env = RocketLandingEnv()
