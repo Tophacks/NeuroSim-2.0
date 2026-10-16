@@ -34,7 +34,7 @@ def label(screen, font, message, pos, color=TEXT):
 def rotated_polygon(screen, color, cx, cy, points, angle):
     # Local +y points down, positive simulation angle leans right.
     ca, sa = math.cos(angle), math.sin(angle)
-    transformed = [(int(cx + x*ca + y*sa), int(cy - x*sa + y*ca)) for x, y in points]
+    transformed = [(int(cx + x*ca - y*sa), int(cy + x*sa + y*ca)) for x, y in points]
     pygame.draw.polygon(screen, color, transformed)
     return transformed
 
