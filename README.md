@@ -83,3 +83,22 @@ git pull
 .\.venv\Scripts\python.exe -m unittest discover -s tests -v
 .\.venv\Scripts\python.exe viewer.py --mode manual
 ```
+
+
+## Updated booster visualization and RCS controls
+
+The Pygame Mission Control now includes a stylized Falcon 9-inspired booster with
+grid fins, deployed landing legs, an engine plume, side-thruster plumes, and live
+telemetry. It is still a simplified 2D educational simulator, not a SpaceX-accurate
+vehicle or a photorealistic rendering.
+
+Manual keys: W/S (or Up/Down) for throttle, A/D (or Left/Right) for engine
+gimbal, Q/E for opposing side thrusters, Space to pause, R to reset, F5 to
+save the current demonstration, and Esc to exit.
+
+**Breaking change:** The environment action vector is now
+`[throttle, gimbal, rcs]`, rather than two controls. Previously trained
+2-action PPO models are incompatible and must be retrained. New manual
+recordings use schema version 2, and imitation training skips old 2-action
+recordings. Keep older files for historical analysis, but don't mix their
+actions into the new policy.
