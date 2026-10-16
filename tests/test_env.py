@@ -31,6 +31,18 @@ class RocketEnvironmentTests(unittest.TestCase):
         a.close()
         b.close()
 
+    def test_rcs_torque(self):
+        a = RocketLandingEnv()
+        b = RocketLandingEnv()
+        a.reset(seed=99)
+        b.reset(seed=99)
+        a.step(np.array([0.0, 0.0, 1.0]))
+        b.step(np.array([0.0, 0.0, -1.0]))
+        self.assertGreater(a.state[5], b.state[5])
+        self.assertEqual(a.action_space.shape, (3,))
+        a.close()
+        b.close()
+
     def test_seed_reproducibility(self):
         env = RocketLandingEnv()
         a, _ = env.reset(seed=123)
