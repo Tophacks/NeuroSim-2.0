@@ -111,7 +111,8 @@ class RocketLandingEnv(gym.Env):
         info = {
             "outcome": outcome,
             "landing_error_m": float(abs(x)) if touchdown else None,
-            "fuel_used_kg": float(v.fuel_mass - fuel),\n            "rcs_command": float(rcs),
+            "fuel_used_kg": float(v.fuel_mass - fuel),
+            "rcs_command": float(rcs),
             "horizontal_speed_m_s": float(abs(vx)),
             "vertical_speed_m_s": float(abs(vz)),
         }

@@ -1,0 +1,30 @@
+name: Tests
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      # The environment tests only need gymnasium + numpy. Training deps
+      # (stable-baselines3 -> torch) are intentionally skipped to keep CI fast.
+      - name: Install test dependencies
+        run: pip install "gymnasium>=1.0,<2.0" "numpy>=1.26,<3"
+      - name: Byte-compile all sources
+        run: python -m compileall -q neurosim tests *.py
+      - name: Unit tests
+        run: python -m unittest discover -s tests -v
