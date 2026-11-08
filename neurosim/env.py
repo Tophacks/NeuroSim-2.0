@@ -11,6 +11,10 @@ from gymnasium import spaces
 
 from .config import PLANETS, get_vehicle
 
+# Peak angular acceleration (rad/s^2) from full RCS command. Deliberately
+# weaker than full-thrust gimbal (2.0) so RCS is a fine attitude trim.
+RCS_ANGULAR_ACCEL = 0.6
+
 
 class RocketLandingEnv(gym.Env):
     metadata = {"render_modes": ["ansi"], "render_fps": 30}
@@ -76,7 +80,10 @@ class RocketLandingEnv(gym.Env):
         thrust = v.max_thrust * (fuel_used / (v.burn_rate*self.dt)) if v.burn_rate > 0 else 0.0
         angle = theta + float(gimbal) * math.radians(v.max_gimbal_deg)
         # Simplified tilt dynamics; damping represents unmodelled stabilization.
+        # RCS: signed cold-gas side thrusters; positive command gives positive
+        # (clockwise) torque and works independently of main-engine fuel.
         angular_acc = (-2.0 * (thrust / max(v.max_thrust, 1.0)) * gimbal
+                       + RCS_ANGULAR_ACCEL * float(rcs)
                        - 0.12 * omega)
         omega += angular_acc * self.dt
         theta += omega * self.dt
@@ -111,7 +118,8 @@ class RocketLandingEnv(gym.Env):
         info = {
             "outcome": outcome,
             "landing_error_m": float(abs(x)) if touchdown else None,
-            "fuel_used_kg": float(v.fuel_mass - fuel),\n            "rcs_command": float(rcs),
+            "fuel_used_kg": float(v.fuel_mass - fuel),
+            "rcs_command": float(rcs),
             "horizontal_speed_m_s": float(abs(vx)),
             "vertical_speed_m_s": float(abs(vz)),
         }
